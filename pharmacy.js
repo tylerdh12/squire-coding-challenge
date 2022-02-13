@@ -12,71 +12,46 @@ export class Pharmacy {
 	}
 
 	updateBenefitValue() {
-		for (var i = 0; i < this.drugs.length; i++) {
-			if (
-				this.drugs[i].name != "Herbal Tea" &&
-				this.drugs[i].name != "Fervex"
-			) {
-				if (this.drugs[i].benefit > 0) {
-					if (this.drugs[i].name != "Magic Pill") {
-						if (this.drugs[i].name != "Dafalgan") {
-							// Standard drug
-							this.drugs[i].benefit = this.drugs[i].benefit - 1;
-						} else {
-							// Dafalgan
-							if (this.drugs[i].benefit > 1) {
-								this.drugs[i].benefit = this.drugs[i].benefit - 2;
-							} else {
-								this.drugs[i].benefit = 0;
-							}
-						}
-					}
-				}
-			} else {
-				if (this.drugs[i].benefit < 50) {
-					this.drugs[i].benefit = this.drugs[i].benefit + 1;
-					if (this.drugs[i].name == "Fervex") {
-						if (this.drugs[i].expiresIn < 11) {
-							if (this.drugs[i].benefit < 50) {
-								this.drugs[i].benefit = this.drugs[i].benefit + 1;
-							}
-						}
-						if (this.drugs[i].expiresIn < 6) {
-							if (this.drugs[i].benefit < 50) {
-								this.drugs[i].benefit = this.drugs[i].benefit + 1;
-							}
-						}
-					}
-				}
+		let updatedDrugs = [];
+
+		this.drugs.reduce((_, currentValue) => {
+			switch (currentValue.name) {
+				case "Herbal Tea":
+					currentValue.expiresIn <= 0 ? (currentValue.benefit += 2) : (currentValue.benefit += 1);
+					currentValue.benefit >= 50 ? (currentValue.benefit = 50) : currentValue.benefit;
+					currentValue.benefit <= 0 ? (currentValue.benefit = 0) : currentValue.benefit;
+					currentValue.expiresIn--;
+					break;
+
+				case "Fervex":
+					currentValue.expiresIn >= 10 ? (currentValue.benefit += 2) : (currentValue.benefit += 1);
+					currentValue.expiresIn >= 5 ? currentValue.benefit : (currentValue.benefit += 1);
+					currentValue.expiresIn == 0 ? (currentValue.benefit = 0) : currentValue.benefit;
+					currentValue.benefit >= 50 ? (currentValue.benefit = 50) : currentValue.benefit;
+					currentValue.benefit <= 0 ? (currentValue.benefit = 0) : currentValue.benefit;
+					currentValue.expiresIn--;
+					break;
+
+				case "Magic Pill":
+					break;
+
+				case "Dafalgan":
+					currentValue.expiresIn <= 0 ? (currentValue.benefit -= 4) : (currentValue.benefit -= 2);
+					currentValue.benefit >= 50 ? (currentValue.benefit = 50) : currentValue.benefit;
+					currentValue.benefit <= 0 ? (currentValue.benefit = 0) : currentValue.benefit;
+					currentValue.expiresIn--;
+					break;
+
+				default:
+					currentValue.expiresIn <= 0 ? (currentValue.benefit -= 2) : (currentValue.benefit -= 1);
+					currentValue.benefit >= 50 ? (currentValue.benefit = 50) : currentValue.benefit;
+					currentValue.benefit <= 0 ? (currentValue.benefit = 0) : currentValue.benefit;
+					currentValue.expiresIn--;
 			}
 
-			// Decrement of ExpiresIn value
-			if (this.drugs[i].name != "Magic Pill") {
-				this.drugs[i].expiresIn = this.drugs[i].expiresIn - 1;
-			}
+			updatedDrugs.push(currentValue);
+		}, []);
 
-			// Post ExpiresIn benefit management
-			if (this.drugs[i].expiresIn < 0) {
-				if (this.drugs[i].name != "Herbal Tea") {
-					if (this.drugs[i].name != "Fervex") {
-						if (this.drugs[i].benefit > 0) {
-							if (this.drugs[i].name != "Magic Pill") {
-								// Standard Drug
-								this.drugs[i].benefit = this.drugs[i].benefit - 1;
-							}
-						}
-					} else {
-						this.drugs[i].benefit =
-							this.drugs[i].benefit - this.drugs[i].benefit;
-					}
-				} else {
-					if (this.drugs[i].benefit < 50) {
-						this.drugs[i].benefit = this.drugs[i].benefit + 1;
-					}
-				}
-			}
-		}
-
-		return this.drugs;
+		return updatedDrugs;
 	}
 }
